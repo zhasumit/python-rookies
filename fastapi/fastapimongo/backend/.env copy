@@ -1,0 +1,5 @@
+MONGODB_URL=mongodb+srv://username:JFIHGBihFijnfg034n3kj@cluster_number.34mo45PK.mongodb.net/?retryWrites=true&w=majority&appName=cluster_name
+DATABASE_NAME=notes_app
+SECRET_KEY=your-secret-key
+ACCESS_TOKEN_EXPIRE_MINUTES=100
+ENVIRONMENT=development
