@@ -1,5 +1,5 @@
 // Navbar.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useSearch } from '../SearchContext';
@@ -10,8 +10,26 @@ const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownRef = useRef(null);
 
     const showSearch = user && location.pathname === '/';
+
+    // Handle click outside to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+
+        if (showDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showDropdown]);
 
     const handleLogout = async () => {
         await logout();
@@ -30,7 +48,7 @@ const Navbar = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '1rem 2rem',
+            padding: '0rem 1.5rem',
             backgroundColor: '#f8f9fa',
             borderBottom: '1px solid #dee2e6',
             marginBottom: '2rem',
@@ -38,7 +56,26 @@ const Navbar = () => {
             position: 'relative'
         }}>
             {user && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', position: 'relative' }} onClick={toggleDropdown}>
+                <div
+                    ref={dropdownRef}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        padding: '0.5rem',
+                        borderRadius: '6px',
+                        transition: 'background-color 0.2s ease',
+                        backgroundColor: showDropdown ? '#f0f0f0' : 'transparent'
+                    }}
+                    onClick={toggleDropdown}
+                    onMouseEnter={(e) => {
+                        if (!showDropdown) e.target.style.backgroundColor = '#f8f9fa';
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!showDropdown) e.target.style.backgroundColor = 'transparent';
+                    }}>
                     <img
                         src={user.profile_picture}
                         alt="Profile"
@@ -47,49 +84,78 @@ const Navbar = () => {
                             height: '36px',
                             borderRadius: '50%',
                             objectFit: 'cover',
-                            border: '1px solid #ccc'
+                            border: '2px solid #9147ff'
                         }}
                     />
                     <span style={{
                         fontSize: '1rem',
-                        fontWeight: '500',
+                        fontWeight: '600',
                         color: '#333',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.25rem'
                     }}>
                         {user.username}
-                        <span style={{ fontSize: '0.8rem' }}>▼</span>
+                        <span style={{
+                            fontSize: '0.8rem',
+                            transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s ease'
+                        }}>▼</span>
                     </span>
                     {showDropdown && (
                         <div style={{
                             position: 'absolute',
                             top: '110%',
                             left: 0,
-                            backgroundColor: 'white',
-                            border: '1px solid #ddd',
-                            borderRadius: '6px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                            padding: '0.5rem 0',
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #e1e5e9',
+                            borderRadius: '8px',
+                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                            padding: '0rem 0',
                             zIndex: 10,
-                            minWidth: '160px'
+                            minWidth: '180px',
+                            animation: 'dropdownSlide 0.2s ease-out'
                         }}>
                             <div
                                 onClick={() => handleNavigate('/profile')}
-                                style={dropdownItemStyle}
+                                style={{
+                                    ...dropdownstyling,
+                                    borderBottom: '1px solid rgb(168, 196, 233)',
+                                    marginBottom: '0.25rem',
+                                    paddingBottom: '0.75rem',
+                                    borderTopLeftRadius: '10px',
+                                    borderTopRightRadius: '10px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = '#f8f9fa';
+                                    e.target.style.color = '#9147ff';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.color = '#333';
+                                }}
                             >
+                                <span style={{ marginRight: '0.5rem' }}>👤</span>
                                 View Profile
                             </div>
                             <div
-                                onClick={() => handleNavigate('/profile/edit')}
-                                style={dropdownItemStyle}
-                            >
-                                Update Profile
-                            </div>
-                            <div
                                 onClick={handleLogout}
-                                style={{ ...dropdownItemStyle, color: '#dc3545' }}
+                                style={{
+                                    ...dropdownstyling,
+                                    color: '#ff6b6b', 
+                                    borderBottomLeftRadius: '10px',
+                                    borderBottomRightRadius: '10px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = '#ff6b6b';
+                                    e.target.style.color = '#fff';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.color = '#ff6b6b';
+                                }}
                             >
+                                <span style={{ marginRight: '0.5rem' }}>🚪</span>
                                 Logout
                             </div>
                         </div>
@@ -107,19 +173,20 @@ const Navbar = () => {
                         style={{
                             flex: 1,
                             padding: '0.5rem 0.75rem',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '6px',
                             fontSize: '0.9rem',
-                            backgroundColor: 'white',
-                            transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                            backgroundColor: '#fff',
+                            color: '#333',
+                            transition: 'all 0.2s ease'
                         }}
                         onFocus={(e) => {
-                            e.target.style.borderColor = '#007bff';
-                            e.target.style.boxShadow = '0 0 0 2px rgba(0, 123, 255, 0.25)';
+                            e.target.style.borderColor = '#9147ff';
+                            e.target.style.boxShadow = '0 0 0 2px rgba(145, 71, 255, 0.2)';
                             e.target.style.outline = 'none';
                         }}
                         onBlur={(e) => {
-                            e.target.style.borderColor = '#ddd';
+                            e.target.style.borderColor = '#dee2e6';
                             e.target.style.boxShadow = 'none';
                         }}
                     />
@@ -127,34 +194,53 @@ const Navbar = () => {
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                         style={{
-                            padding: '0.3rem 0.6rem',
-                            border: 'none',
+                            padding: '0.5rem 0.75rem',
+                            border: '1px solid #dee2e6',
                             borderRadius: '6px',
-                            fontSize: '0.8rem',
-                            transition: 'background-color 0.2s ease',
+                            fontSize: '0.9rem',
+                            backgroundColor: '#fff',
+                            color: '#333',
+                            transition: 'all 0.2s ease',
                             cursor: 'pointer'
                         }}
                     >
-                        <option value="all" style={{ backgroundColor: 'transparent' }}>All</option>
-                        <option value="todo" style={{ backgroundColor: 'transparent' }}>To Do</option>
-                        <option value="In Progress" style={{ backgroundColor: 'transparent' }}>In Progress</option>
-                        <option value="In Review" style={{ backgroundColor: 'transparent' }}>In Review</option>
-                        <option value="Done" style={{ backgroundColor: 'transparent' }}>Done</option>
-                        <option value="Archived" style={{ backgroundColor: 'transparent' }}>Archived</option>
+                        <option value="all">All</option>
+                        <option value="todo">To Do</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="In Review">In Review</option>
+                        <option value="Done">Done</option>
+                        <option value="Archived">Archived</option>
                     </select>
                 </div>
             )}
+
+            <style jsx>{`
+                @keyframes dropdownSlide {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `}</style>
         </nav>
     );
 };
 
-const dropdownItemStyle = {
-    padding: '0.5rem 1rem',
+const dropdownstyling = {
+    padding: '0.75rem 1rem',
     fontSize: '0.9rem',
+    fontWeight: '500',
     cursor: 'pointer',
     color: '#333',
     whiteSpace: 'nowrap',
-    transition: 'background 0.2s'
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: 'transparent'
 };
 
 export default Navbar;

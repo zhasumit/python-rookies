@@ -17,6 +17,7 @@ from schemas import (
     individual_note_data,
     all_notes_data,
 )
+import json
 from pydantic import BaseModel
 from configurations import settings
 
@@ -104,6 +105,16 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
+def process_user_from_db(user_data: dict) -> dict:
+    """Process user data from database, converting JSON strings to objects where needed"""
+    if user_data.get("social_media") and isinstance(user_data["social_media"], str):
+        try:
+            user_data["social_media"] = json.loads(user_data["social_media"])
+        except json.JSONDecodeError:
+            user_data["social_media"] = None
+    return user_data
+
+
 async def get_current_user(request: Request):
     token = request.cookies.get("access_token")
     if not token:
@@ -129,6 +140,7 @@ async def get_current_user(request: Request):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
         )
 
+    user = process_user_from_db(user)
     return User(**user)
 
 
@@ -171,7 +183,7 @@ async def signup(user_data: UserSignup, response: Response):
         mobile_number=user_data.mobile_number,
     )
 
-    await users_collection.insert_one(user.dict())
+    await users_collection.insert_one(user.model_dump())
 
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -221,6 +233,15 @@ async def login(user_data: UserLogin, response: Response):
         secure=False,  # Set to True in production with HTTPS
         samesite="lax",
     )
+
+    # Parse social_media JSON string before creating User object
+    if user.get("social_media") and isinstance(user["social_media"], str):
+        import json
+
+        try:
+            user["social_media"] = json.loads(user["social_media"])
+        except json.JSONDecodeError:
+            user["social_media"] = None
 
     user_obj = User(**user)
     return {"message": "Login successful", "user": individual_user_data(user_obj)}
@@ -355,6 +376,142 @@ async def add_comment(
     )
 
     return {"message": "Comment added successfully", "comment": comment.dict()}
+
+
+# Add these routes to your main.py file after the existing routes
+
+
+# Profile routes
+@app.get("/profile")
+async def get_profile(current_user: User = Depends(get_current_user)):
+    """Get current user's profile"""
+    return {"profile": individual_user_data(current_user)}
+
+
+from fastapi import HTTPException, status
+from pydantic import BaseModel, validator
+from typing import Optional
+import re
+
+
+class ProfileUpdate(BaseModel):
+    username: Optional[str] = None
+    profile_picture: Optional[str] = None
+    location: Optional[str] = None
+    mobile_number: Optional[str] = None
+    social_media: Optional[str] = None  # JSON string
+
+    @validator("username")
+    def validate_username(cls, v):
+        if v is not None:
+            # Remove whitespace
+            v = v.strip()
+            # Check length
+            if len(v) < 3 or len(v) > 50:
+                raise ValueError("Username must be between 3 and 50 characters")
+            # Check format (alphanumeric, underscore, hyphen only)
+            if not re.match(r"^[a-zA-Z0-9_-]+$", v):
+                raise ValueError(
+                    "Username can only contain letters, numbers, underscores, and hyphens"
+                )
+        return v
+
+
+@app.put("/profile/edit")
+async def update_profile(
+    profile_data: ProfileUpdate, current_user: User = Depends(get_current_user)
+):
+    """Update current user's profile"""
+
+    # Check if username is provided and validate availability
+    if profile_data.username and profile_data.username != current_user.username:
+        existing_username = await users_collection.find_one(
+            {
+                "username": profile_data.username,
+                "user_id": {"$ne": current_user.user_id},
+            }
+        )
+        if existing_username:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken"
+            )
+
+    # Prepare update data
+    update_data = {}
+    for field, value in profile_data.dict().items():
+        if value is not None:
+            if (
+                field
+                in ["profile_picture", "location", "mobile_number", "social_media"]
+                and value.strip() == ""
+            ):
+                update_data[field] = None
+            else:
+                update_data[field] = value
+
+    if update_data:
+        update_data["updated_at"] = int(datetime.timestamp(datetime.now()))
+        result = await users_collection.update_one(
+            {"user_id": current_user.user_id}, {"$set": update_data}
+        )
+
+        if result.matched_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+
+    # Get updated user data and process it
+    updated_user = await users_collection.find_one({"user_id": current_user.user_id})
+    if not updated_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    # Process user data before creating User object
+    updated_user = process_user_from_db(updated_user)
+    user_obj = User(**updated_user)
+
+    return {
+        "message": "Profile updated successfully",
+        "profile": individual_user_data(user_obj),
+    }
+
+
+# Optional: Add a separate endpoint to check username availability
+@app.get("/profile/check-username/{username}")
+async def check_username_availability(
+    username: str, current_user: User = Depends(get_current_user)
+):
+    """Check if username is available"""
+
+    # Validate username format
+    if len(username) < 3 or len(username) > 50:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username must be between 3 and 50 characters",
+        )
+
+    if not re.match(r"^[a-zA-Z0-9_-]+$", username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username can only contain letters, numbers, underscores, and hyphens",
+        )
+
+    # Check if it's the current user's username
+    if username == current_user.username:
+        return {"available": True, "message": "This is your current username"}
+
+    # Check if username exists
+    existing_user = await users_collection.find_one({"username": username})
+
+    return {
+        "available": existing_user is None,
+        "message": (
+            "Username is available"
+            if existing_user is None
+            else "Username is already taken"
+        ),
+    }
 
 
 if __name__ == "__main__":

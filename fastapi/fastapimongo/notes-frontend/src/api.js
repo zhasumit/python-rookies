@@ -39,6 +39,14 @@ const api = {
     getMe: () => api.request('/auth/me'),
   },
 
+  profile: {
+    get: () => api.request('/profile'),
+    update: (profileData) => api.request('/profile/edit', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    }),
+  },
+
   notes: {
     getAll: () => api.request('/notes'),
     create: (noteData) => api.request('/notes', {

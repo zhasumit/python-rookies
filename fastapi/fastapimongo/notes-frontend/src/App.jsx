@@ -6,6 +6,8 @@ import Navbar from './components/Navbar';
 import NotesPage from './components/NotesPage';
 import LoginForm from './components/LoginForm';
 import SignupForm from './components/SignupForm';
+import Profile from './components/Profile';
+import ProfileEdit from './components/ProfileEdit';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 
@@ -22,6 +24,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <NotesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/edit"
+                element={
+                  <ProtectedRoute>
+                    <ProfileEdit />
                   </ProtectedRoute>
                 }
               />
