@@ -51,7 +51,6 @@ const Navbar = () => {
             padding: '0rem 1.5rem',
             backgroundColor: '#f8f9fa',
             borderBottom: '1px solid #dee2e6',
-            marginBottom: '2rem',
             gap: '1rem',
             position: 'relative'
         }}>
