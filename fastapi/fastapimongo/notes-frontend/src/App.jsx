@@ -10,6 +10,7 @@ import ProfileEdit from './components/ProfileEdit';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import Breadcrumb from './components/Breadcrumb';
+import NoteDetailPage from './components/NoteDetailPage';
 
 function AppContent() {
   const location = useLocation();
@@ -32,9 +33,17 @@ function AppContent() {
         <Routes>
           <Route
             path="/"
-            element={
+            element={ 
               <ProtectedRoute>
                 <NotesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notes/:noteId"
+            element={
+              <ProtectedRoute>
+                <NoteDetailPage />
               </ProtectedRoute>
             }
           />

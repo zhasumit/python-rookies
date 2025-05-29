@@ -1,4 +1,6 @@
+// NoteCard.js
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 
 const buttonStyles = {
@@ -34,6 +36,12 @@ const secondaryButtonStyles = {
 };
 
 const NoteCard = ({ note, onEdit, onDelete }) => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        navigate(`/notes/${note.note_id}`);
+    };
+
     const formatDate = (timestamp) => {
         return new Date(timestamp * 1000).toLocaleDateString();
     };
@@ -126,7 +134,7 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
                 marginTop: '0.8em',
                 marginBottom: '0.2em',
                 color: '#24292f',
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segue UI", Roboto, sans-serif'
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}>
                 {children}
             </h4>
@@ -290,15 +298,18 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
     };
 
     return (
-        <div style={{
-            border: '1px solid #ddd',
-            borderRadius: '6px',
-            padding: '1.2rem',
-            backgroundColor: getStatusColor(note.status),
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            height: 'fit-content',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-        }}
+        <div
+            onClick={handleClick}
+            style={{
+                border: '1px solid #ddd',
+                borderRadius: '6px',
+                padding: '1.2rem',
+                backgroundColor: getStatusColor(note.status),
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                height: 'fit-content',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                cursor: 'pointer'
+            }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
                 e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
@@ -306,12 +317,13 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
             onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            }}>
+            }}
+        >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <h3 style={{ margin: '0', color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>{note.title}</h3>
                 <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
                     <button
-                        onClick={() => onEdit(note)}
+                        onClick={(e) => { e.stopPropagation(); onEdit(note); }}
                         style={primaryButtonStyles}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-2px)';
@@ -327,13 +339,13 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
                         }}
                         onMouseUp={(e) => {
                             e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 5px 0 #a0a7bd';
+                            e.currentTarget.style.boxShadow = '0 5px 0 #a05d4d';
                         }}
                     >
                         edit
                     </button>
                     <button
-                        onClick={() => onDelete(note.note_id)}
+                        onClick={(e) => { e.stopPropagation(); onDelete(note.note_id); }}
                         style={secondaryButtonStyles}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-2px)';

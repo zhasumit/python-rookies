@@ -49,6 +49,7 @@ const api = {
 
   notes: {
     getAll: () => api.request('/notes'),
+    get: (noteId) => api.request(`/notes/${noteId}`),
     create: (noteData) => api.request('/notes', {
       method: 'POST',
       body: JSON.stringify(noteData),

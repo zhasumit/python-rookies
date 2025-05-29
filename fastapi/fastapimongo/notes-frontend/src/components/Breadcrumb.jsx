@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Breadcrumb = ({ items }) => {
     return (
         <nav style={{
@@ -24,10 +22,13 @@ const Breadcrumb = ({ items }) => {
                         {index > 0 && (
                             <span style={{ margin: '0 0.25rem', color: '#656d76' }}>/</span>
                         )}
-                        <a href={item.link} style={{
-                            color: index === items.length - 1 ? '#7ca8ea' : '#656d76',
-                            textDecoration: 'none'
-                        }}>
+                        <a
+                            href={item.link === '/notes' ? '/' : item.link}
+                            style={{
+                                color: index === items.length - 1 ? '#7ca8ea' : '#656d76',
+                                textDecoration: 'none'
+                            }}
+                        >
                             {item.name}
                         </a>
                     </li>
