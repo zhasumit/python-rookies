@@ -1,6 +1,38 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
+const buttonStyles = {
+    padding: '0.75rem 1.5rem',
+    borderRadius: '6px',
+    fontSize: '1.5em',
+    fontWeight: 400,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    border: '1px solid transparent',
+    textDecoration: 'none',
+    display: 'inline-block',
+};
+
+const primaryButtonStyles = {
+    ...buttonStyles,
+    background: 'rgb(215, 222, 238)',
+    color: 'black',
+    boxShadow: '0 4px 0 #a0a7bd',
+    transform: 'translateY(0)',
+    padding: '0.25rem 0.5rem',
+    fontSize: '0.8rem',
+};
+
+const secondaryButtonStyles = {
+    ...buttonStyles,
+    background: '#d97757',
+    color: 'white',
+    boxShadow: '0 4px 0 #a05d4d',
+    transform: 'translateY(0)',
+    padding: '0.25rem 0.5rem',
+    fontSize: '0.8rem',
+};
+
 const NoteCard = ({ note, onEdit, onDelete }) => {
     const formatDate = (timestamp) => {
         return new Date(timestamp * 1000).toLocaleDateString();
@@ -8,48 +40,44 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
 
     const getStatusColor = (status) => {
         const colors = {
-            'todo': '#fefefe', 
-            'In Progress': '#f0f7ff', 
-            'In Review': '#fffdf0', 
-            'Done': '#f0fff0', 
+            'todo': '#fefefe',
+            'In Progress': '#f0f7ff',
+            'In Review': '#fffdf0',
+            'Done': '#f0fff0',
             'Archived': '#fafafa'
         };
         return colors[status] || '#fefefe';
     };
 
-    // Function to generate random light colors for tags
     const getRandomLightColor = (tag) => {
-        // Create a hash from the tag to ensure consistent colors for the same tag
         let hash = 0;
         for (let i = 0; i < tag.length; i++) {
             const char = tag.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
+            hash = hash & hash;
         }
 
-        // Use the hash to generate consistent light colors
         const colors = [
-            '#FFFAFA', 
-            '#F0F8FF', 
-            '#F5FFFA', 
-            '#FFF5F0', 
-            '#F8F0FF', 
-            '#FAFFFF', 
-            '#FFFFF0', 
-            '#FFFAF8', 
-            '#F8FAFF', 
-            '#F0FFFF', 
-            '#FFF0F5', 
-            '#F0F5FF', 
-            '#F5FFF0', 
-            '#FFF0FA', 
-            '#F0FFF5'  
+            '#FFFAFA',
+            '#F0F8FF',
+            '#F5FFFA',
+            '#FFF5F0',
+            '#F8F0FF',
+            '#FAFFFF',
+            '#FFFFF0',
+            '#FFFAF8',
+            '#F8FAFF',
+            '#F0FFFF',
+            '#FFF0F5',
+            '#F0F5FF',
+            '#F5FFF0',
+            '#FFF0FA',
+            '#F0FFF5'
         ];
 
         return colors[Math.abs(hash) % colors.length];
     };
 
-    // GitHub-style markdown components with smaller font sizes
     const markdownComponents = {
         h1: ({ children }) => (
             <h1 style={{
@@ -284,37 +312,47 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
                 <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
                     <button
                         onClick={() => onEdit(note)}
-                        style={{
-                            padding: '0.25rem 0.5rem',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.8rem',
-                            transition: 'background-color 0.2s ease'
+                        style={primaryButtonStyles}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 5px 0 #a0a7bd';
                         }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = '#007bff'}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 3px 0 #a0a7bd';
+                        }}
+                        onMouseDown={(e) => {
+                            e.currentTarget.style.transform = 'translateY(2px)';
+                            e.currentTarget.style.boxShadow = '0 1.5px 0 #a0a7bd';
+                        }}
+                        onMouseUp={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 5px 0 #a0a7bd';
+                        }}
                     >
-                        Edit
+                        edit
                     </button>
                     <button
                         onClick={() => onDelete(note.note_id)}
-                        style={{
-                            padding: '0.25rem 0.5rem',
-                            backgroundColor: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.8rem',
-                            transition: 'background-color 0.2s ease'
+                        style={secondaryButtonStyles}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 5px 0 #a05d4d';
                         }}
-                        onMouseEnter={(e) => e.target.style.backgroundColor = '#c82333'}
-                        onMouseLeave={(e) => e.target.style.backgroundColor = '#dc3545'}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 3px 0 #a05d4d';
+                        }}
+                        onMouseDown={(e) => {
+                            e.currentTarget.style.transform = 'translateY(2px)';
+                            e.currentTarget.style.boxShadow = '0 1.5px 0 #a05d4d';
+                        }}
+                        onMouseUp={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 5px 0 #a05d4d';
+                        }}
                     >
-                        Delete
+                        delete
                     </button>
                 </div>
             </div>

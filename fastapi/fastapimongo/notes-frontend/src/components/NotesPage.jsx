@@ -5,6 +5,28 @@ import api from '../api';
 import NoteCard from './NoteCard';
 import NoteForm from './NoteForm';
 
+const buttonStyles = {
+    padding: '0.75rem 1.5rem',
+    borderRadius: '6px',
+    fontSize: '1.5em',
+    fontWeight: 400,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    border: '1px solid transparent',
+    textDecoration: 'none',
+    display: 'inline-block',
+};
+
+const successButtonStyles = {
+    ...buttonStyles,
+    background: '#42ad5f',
+    color: 'white',
+    boxShadow: '0 4px 0 #586b59',
+    transform: 'translateY(0)',
+    padding: '0.4rem 0.7rem',
+    fontSize: '0.9em',
+};
+
 const NotesPage = () => {
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -104,23 +126,31 @@ const NotesPage = () => {
                 </div>
             )}
 
-            <div style={{ overflow: 'auto', marginBottom: '2rem' }}>
+            <div style={{ marginBottom: '10px', marginLeft: '0px', textAlign: 'right' }}>
                 <button
                     onClick={() => setShowForm(true)}
-                    style={{
-                        float: 'right',
-                        padding: '0.75rem 1.5rem',
-                        backgroundColor: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '1rem'
+                    style={successButtonStyles}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 5px 0 #a0a7bd';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 3px 0 #a0a7bd';
+                    }}
+                    onMouseDown={(e) => {
+                        e.currentTarget.style.transform = 'translateY(2px)';
+                        e.currentTarget.style.boxShadow = '0 1.5px 0 #a0a7bd';
+                    }}
+                    onMouseUp={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 5px 0 #a0a7bd';
                     }}
                 >
                     + New Note
                 </button>
             </div>
+
 
             {filteredNotes.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>
