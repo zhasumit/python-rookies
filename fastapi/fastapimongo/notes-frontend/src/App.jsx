@@ -1,3 +1,4 @@
+// App.jsx
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { SearchProvider } from './SearchContext';
@@ -11,6 +12,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import Breadcrumb from './components/Breadcrumb';
 import NoteDetailPage from './components/NoteDetailPage';
+import NoteForm from './components/NoteForm';
 
 function AppContent() {
   const location = useLocation();
@@ -33,7 +35,7 @@ function AppContent() {
         <Routes>
           <Route
             path="/"
-            element={ 
+            element={
               <ProtectedRoute>
                 <NotesPage />
               </ProtectedRoute>
@@ -44,6 +46,14 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <NoteDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notes/:noteId/edit"
+            element={
+              <ProtectedRoute>
+                <NoteForm />
               </ProtectedRoute>
             }
           />

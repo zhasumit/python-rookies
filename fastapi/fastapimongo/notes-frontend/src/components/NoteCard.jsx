@@ -35,11 +35,16 @@ const secondaryButtonStyles = {
     fontSize: '0.8rem',
 };
 
-const NoteCard = ({ note, onEdit, onDelete }) => {
+const NoteCard = ({ note, onDelete }) => {
     const navigate = useNavigate();
 
     const handleClick = () => {
         navigate(`/notes/${note.note_id}`);
+    };
+
+    const handleEdit = (e) => {
+        e.stopPropagation();
+        navigate(`/notes/${note.note_id}/edit`);
     };
 
     const formatDate = (timestamp) => {
@@ -323,7 +328,7 @@ const NoteCard = ({ note, onEdit, onDelete }) => {
                 <h3 style={{ margin: '0', color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>{note.title}</h3>
                 <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
                     <button
-                        onClick={(e) => { e.stopPropagation(); onEdit(note); }}
+                        onClick={handleEdit}
                         style={primaryButtonStyles}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.transform = 'translateY(-2px)';
